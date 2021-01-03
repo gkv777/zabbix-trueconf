@@ -48,6 +48,13 @@ type successResponse struct {
 	Data interface{} `json:"data"`
 }
 
+type clientResponse struct {
+	Online int `json:"online"`
+	Busy   int `json:"busy"`
+	Active int `json:"active"`
+	All    int `json:"all"`
+}
+
 // NewClient creates new Truconf API client
 func NewClient(cfg *Config) (*Client, error) {
 
@@ -172,7 +179,32 @@ func (c *Client) GetTrueConfInfo() {
 		log.Println("[GetTrueConfInfo|getUserListError]", err)
 		fmt.Println("error")
 	}
-	info := &TrueConfInfo{}
-	info.GetUsersInfo(*users, c.Debug)
-	info.Print()
+	getUsersInfo(*users, c.Debug)
+}
+
+// getUsersInfo ...
+func getUsersInfo(us []User, debug bool){
+	var i = clientResponse{}
+	for _, u := range us {
+		if u.IsActive == 1 {
+			i.Active++
+		}
+		if u.Status == 2 {
+			i.Busy++
+			i.Online++
+		}
+		if u.Status == 1 {
+			i.Online++
+		}
+	}
+	i.All = len(us)
+	if debug {
+		log.Printf("GetUsersinfo: %d|%d|%d|%d\n", i.Online, i.Busy, i.Active, i.All)
+	}
+	e, err := json.Marshal(i)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(string(e))
 }

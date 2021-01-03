@@ -48,11 +48,10 @@ func validateConfigPath(path string) error {
 
 // parseFlag will create and parse CLI flags
 // and returns the path to be userd elsewhere
-func parseFlags() (string, bool, bool, bool, string) {
+func parseFlags() (string, bool, bool, string) {
 	var (
 		configPath  string
 		logPath     string
-		usersCmd    bool
 		showVersion bool
 		showHelp    bool
 	)
@@ -61,21 +60,21 @@ func parseFlags() (string, bool, bool, bool, string) {
 		log.Fatal(err)
 	}
 
-	flag.StringVar(&configPath, "config", fmt.Sprintf("%s/zabbix-tconf.yml", dir), "path to config file")
+	flag.StringVar(&configPath, "config", fmt.Sprintf("%s/zabbix-trueconf.yml", dir), "path to config file")
 	flag.StringVar(&logPath, "logfile", fmt.Sprintf("%s/zabbix-tconf.log", dir), "path to log file")
-	flag.BoolVar(&usersCmd, "users", false, "get users info")
 	flag.BoolVar(&showVersion, "version", false, "show version")
 	flag.BoolVar(&showHelp, "help", false, "show help")
 	flag.Parse()
 
-	return configPath, usersCmd, showVersion, showHelp, logPath
+	return configPath, showVersion, showHelp, logPath
 }
 
 func help() {
 	_, pname := filepath.Split(os.Args[0])
-	fmt.Printf("Usage: \n %s --users [--config=path] [--logfile=path]\n", pname)
+	fmt.Printf("Usage: \n %s [OPTIONS]\n", pname)
 	fmt.Printf(" %s --version\n", pname)
 	fmt.Printf(" %s --help\n", pname)
+	fmt.Printf("OPTIONS:\n --config=path to config file\n --log=path to log file \n")
 	os.Exit(0)
 }
 
@@ -84,7 +83,7 @@ func main() {
 	t0 := time.Now()
 
 	// Generate our config based on the config supplied by the user in the flags
-	cfgPath, usersCmd, showVersion, showHelp, logPath := parseFlags()
+	cfgPath, showVersion, showHelp, logPath := parseFlags()
 
 	if showHelp {
 		help()
@@ -115,9 +114,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if usersCmd {
-		client.GetTrueConfInfo()
-	}
+	client.GetTrueConfInfo()
 
 	// Program finish time
 	t1 := time.Now()
